@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from markdown import markdown
 from django.urls import reverse
-from .forms import MyForm
+from .forms import MyForm, NewPageForm
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 
@@ -60,3 +60,8 @@ def search(request):
             })
 
 
+def new(request):
+    form = NewPageForm()
+    return render(request, "encyclopedia/newpage.html", {
+        "form":form
+    })
