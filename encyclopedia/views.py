@@ -4,6 +4,7 @@ from django.urls import reverse
 from .forms import MyForm, NewPageForm, EditPageForm
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
+from random import randint
 
 from . import util
 
@@ -86,8 +87,7 @@ def edit(request):
             title = form.cleaned_data['title'].capitalize()
             content = form.cleaned_data['content']
             util.save_entry(title, content)
-            return HttpResponse(title)
-        return redirect(reverse("entry", kwargs={"title": "python"}))
+            return redirect(reverse("entry", kwargs={"title": title.lower()}))
     previous_url = request.META.get('HTTP_REFERER', None)
     urlparts = previous_url.split('/')
     title = urlparts[len(urlparts) - 1]
@@ -95,3 +95,8 @@ def edit(request):
     return render(request, "encyclopedia/editpage.html", {
         "form": form
     })
+
+def random(request):
+    entries = util.list_entries()
+    entry = entries[randint(0, len(entries) - 1)]
+    return redirect(reverse("entry", kwargs={"title": entry.lower()}))

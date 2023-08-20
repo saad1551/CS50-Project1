@@ -8,6 +8,7 @@
 
     <form action="{% url 'edit' %}" method="POST">
         {% csrf_token %}
+        {{ form.title }}
         <div class="form__container">
             <div class="form__content">
                 <label for="content">Content:</label>
@@ -15,8 +16,6 @@
             </div>
             <button type="submit">Submit</button>
         </div>
-
-
     </form>
 
 {% endblock %}
