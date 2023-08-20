@@ -25,10 +25,15 @@ def index(request):
     })
 
 def entry(request, title):
-    return render(request, "encyclopedia/entry.html", {
-        "title": title.capitalize(),
-        "content": markdown(util.get_entry(title)) if util.get_entry(title) else "<h1>Sorry! The page you requested doesn't exist</h1>"
-    })
+    if util.get_entry(title):
+        return render(request, "encyclopedia/entry.html", {
+            "title": title.capitalize(),
+            "content": markdown(util.get_entry(title)) if util.get_entry(title) else "<h1>Sorry! The page you requested doesn't exist</h1>"
+        })
+    else:
+        return render(request, "encyclopedia/error.html", {
+            "error": "Sorry! The Page you requested doesn't exist"
+        })
 
 @require_POST
 def search(request):
@@ -57,7 +62,7 @@ def search(request):
             })
         else:
             return render(request, "encyclopedia/error.html", {
-                "error": "<h3>No matching entries found</h3>"
+                "error": "No matching entries found"
             })
 
 
@@ -71,7 +76,7 @@ def new(request):
             for savedTitle in savedTitles:
                 if title.lower() == savedTitle.lower():
                     return render(request, "encyclopedia/error.html", {
-                        "error": "<h1>An entry with the same title already exists</h1>"
+                        "error": "An entry with the same title already exists"
                     })
             util.save_entry(title, content)
             return redirect(reverse("entry", kwargs={"title": title.lower()}))
