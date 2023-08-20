@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from markdown import markdown
 from django.urls import reverse
-from .forms import MyForm, NewPageForm
+from .forms import MyForm, NewPageForm, EditPageForm
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse
 
@@ -61,7 +61,37 @@ def search(request):
 
 
 def new(request):
+    if request.method == "POST":
+        form = NewPageForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            content = form.cleaned_data['content']
+            savedTitles = util.list_entries()
+            for savedTitle in savedTitles:
+                if title.lower() == savedTitle.lower():
+                    return render(request, "encyclopedia/error.html", {
+                        "error": "<h1>An entry with the same title already exists</h1>"
+                    })
+            util.save_entry(title, content)
+            return redirect(reverse("entry", kwargs={"title": title.lower()}))
     form = NewPageForm()
     return render(request, "encyclopedia/newpage.html", {
         "form":form
+    })
+
+def edit(request):
+    if request.method == "POST":
+        form = EditPageForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title'].capitalize()
+            content = form.cleaned_data['content']
+            util.save_entry(title, content)
+            return HttpResponse(title)
+        return redirect(reverse("entry", kwargs={"title": "python"}))
+    previous_url = request.META.get('HTTP_REFERER', None)
+    urlparts = previous_url.split('/')
+    title = urlparts[len(urlparts) - 1]
+    form = EditPageForm(initial={"title": title.capitalize(), "content": util.get_entry(title)})
+    return render(request, "encyclopedia/editpage.html", {
+        "form": form
     })
